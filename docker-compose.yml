@@ -1,0 +1,32 @@
+﻿services:
+  postgres:
+    image: postgres:15
+    container_name: ovalgenerator_postgres
+    restart: always
+    environment:
+      POSTGRES_DB: oval_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  ovalgenerator.api:
+    image: ovalgenerator.api
+    build:
+      context: .
+      dockerfile: OVALGenerator.Api/Dockerfile
+    depends_on:
+      - postgres
+    environment:
+      ASPNETCORE_ENVIRONMENT: "Development"
+      ASPNETCORE_URLS: "http://+:5000"
+      ConnectionStrings__DefaultConnection: "Host=postgres;Port=5432;Database=oval_db;Username=postgres;Password=postgres"
+    ports:
+      - "5000:5000"
+      - "5001:5001"
+
+volumes:
+  pgdata:
+
